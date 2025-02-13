@@ -2,6 +2,8 @@
 
 This project implements a caching proxy server in Go that forwards requests to a specified origin URL and caches the responses to improve performance.
 
+This project is part of the backend section from [roadmap.sh](https://roadmap.sh/projects/caching-server).
+
 ## Features
 
 - Forwards HTTP requests to an origin server.
