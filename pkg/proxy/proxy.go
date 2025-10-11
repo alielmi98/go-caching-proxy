@@ -46,8 +46,16 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.cache.Set(cacheKey, body, 5*time.Minute)
-	w.Header().Set("X-Cache", "MISS")
+	// Only cache successful responses and reasonable sizes (in this case we use 10mb)
+	if resp.StatusCode == http.StatusOK && len(body) < 10*1024*1024 {
+		p.cache.Set(cacheKey, body, 5*time.Minute)
+		w.Header().Set("X-Cache", "MISS")
+		log.Printf("Fetched from origin and cached: %s (%d bytes)", cacheKey, len(body))
+	} else {
+		w.Header().Set("X-Cache", "MISS-NOT-CACHED")
+		log.Printf("Fetched from origin but not cached: %s (status: %d, size: %d bytes)", 
+			cacheKey, resp.StatusCode, len(body))
+	}
+
 	w.Write(body)
-	log.Printf("Fetched from origin and cached: %s", cacheKey)
 }
